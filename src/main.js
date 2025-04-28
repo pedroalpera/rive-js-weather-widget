@@ -6,11 +6,16 @@ const riveInstance = new rive.Rive({
   canvas: document.getElementById("canvas"),
   autoplay: true,
   artboard: "Artboard",
+  autoBind: true,
   automaticallyHandleEvents: true, // Automatically handle RiveHTTPEvents
   stateMachines: "State Machine 1",
 
   onLoad: () => {
     riveInstance.resizeDrawingSurfaceToCanvas();
+
+     const instance = riveInstance.viewModelInstance;
+   
+    
 
     /////////////// -- Text Input -- ///////////////
 
@@ -129,42 +134,41 @@ const riveInstance = new rive.Rive({
         if (!res.ok) {
           console.log("ERROR - Not found");
 
-          // document.querySelector(
-          //   ".data-wrapper"
-          // ).innerHTML = `<h2 class="error">Unable to fetch data</h2>`;
-          // return new Error("Unable to fetch data");
+       
         } else {
           res.json().then((data) => {
-                   //TemperatureRun
-            riveInstance.setTextRunValue(
-              "TemperatureRun",
-              Math.floor(data.main.temp) + "°C"
-            );
-            riveInstance.setTextRunValue(
-              "HumidityRun",
-              data.main.humidity + "%"
-            );
-            riveInstance.setTextRunValue(
-              "PressureRun",
-              data.main.pressure + ""
-            );
-            riveInstance.setTextRunValue(
-              "DescriptionRun",
-              data.weather[0].description
-            );
-            riveInstance.setTextRunValue("WindSpeedRun", data.wind.speed + "");
-            riveInstance.setTextRunValue("CityRun", data.name);
+            
+            // Send to values to the view model with data binding
+            let temperature = instance.string("Temperature");         
+            temperature.value = Math.floor(data.main.temp) + "°C";
+
+            let humidity = instance.string("Humidity");         
+            humidity.value = data.main.humidity + "%";
+           
+            let pressure = instance.string("Pressure");         
+            pressure.value = data.main.pressure + "";
+
+            let description = instance.string("Description");         
+            description.value = data.weather[0].description;
+
+            let wind = instance.string("Wind");         
+            wind.value = data.wind.speed + "";
+
+            let city = instance.string("City");         
+            city.value = data.name;
 
             let iconData = data.weather[0].icon;
             iconData = iconData.substring(0, iconData.length - 1);
+ 
+            let iconNumber = instance.number("IconNumber");
+            iconNumber.value = iconData;             
 
-            iconNumber.value = iconData;
           });
         }
       });
     }
 
-    getWeather("Sevilla");
+    getWeather("New York");
 
     // END //
   },
