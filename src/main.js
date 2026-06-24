@@ -14,55 +14,55 @@ const riveInstance = new rive.Rive({
     riveInstance.resizeDrawingSurfaceToCanvas();
 
      const instance = riveInstance.viewModelInstance;
-   
+     const inputTextFocus = instance.boolean("inputTextFocus"); 
+
+    // Get the "Search" trigger property
+    const searchTrigger = instance.trigger("search");
+
+    searchTrigger.on(() => {
+      getWeather(textInput);
+    });
+
+    // Get the "DeleteAll" trigger property
+    const deleteTrigger = instance.trigger("deleteAll");
     
+    deleteTrigger.on(() => {
+      riveInstance.setTextRunValue("InputTextRun", "");
+      textInput = "";     
+    });
+
+
+    // Get the "InputFocus" trigger property
+    const inputFocusTrigger = instance.trigger("inputFocus");
+    
+    inputFocusTrigger.on(() => {
+      riveInstance.setTextRunValue("HintInputTextRun", "");
+      inputFocus = true; 
+    });
+
+
+    // Get the "DeactivateInputFocus" trigger property
+    const deactivateInputFocusTrigger = instance.trigger("deactivateInputFocus");
+    
+    deactivateInputFocusTrigger.on(() => {
+        if (textInput.length == 0) {
+          riveInstance.setTextRunValue("HintInputTextRun", "City Name");
+        }
+         inputFocus = false;
+    });
 
     /////////////// -- Text Input -- ///////////////
 
     // If we click over the transparent html text
     document.getElementById("inputTextField").onfocus = function () {
       riveInstance.setTextRunValue("HintInputTextRun", "");
-      inputTextFocus_Boolean.value = true;
+
+    
+      inputTextFocus.value = true;  
       inputFocus = true;
     };
 
-    // Inputs in Rive file
-    const inputs = riveInstance.stateMachineInputs("State Machine 1");
-
-    let inputTextFocus_Boolean = inputs.find(
-      (i) => i.name === "inputTextFocus_Boolean"
-    );
-    let iconNumber = inputs.find((i) => i.name === "iconNumber");
-
-    // Rive Events
-
-    const onRiveEventReceived = (riveEvent) => {
-      const eventData = riveEvent.data;
-      const eventProperties = eventData.properties;
-
-      if (eventData.type === rive.RiveEventType.General) {
-        if (eventData.name == "Event Search") {
-          getWeather(textInput);
-        }
-        if (eventData.name == "Event DeleteAll") {
-          riveInstance.setTextRunValue("InputTextRun", "");
-          textInput = "";
-        }
-        if (eventData.name == "Event InputFocus") {
-          riveInstance.setTextRunValue("HintInputTextRun", "");
-          inputFocus = true;
-        }
-        if (eventData.name == "Event DeactivateInputFocus") {
-          if (textInput.length == 0) {
-            riveInstance.setTextRunValue("HintInputTextRun", "City Name");
-          }
-
-          inputFocus = false;
-        }
-      }
-    };
-
-    riveInstance.on(rive.EventType.RiveEvent, onRiveEventReceived);
+   
 
     // InputFocus
     let inputFocus = false;
@@ -93,7 +93,8 @@ const riveInstance = new rive.Rive({
         if (textInput.length == 0) {
           riveInstance.setTextRunValue("HintInputTextRun", "City Name");
         }
-        inputTextFocus_Boolean.value = false;
+          
+        inputTextFocus.value = false;        
         inputFocus = false;
       }
     }
@@ -139,29 +140,27 @@ const riveInstance = new rive.Rive({
           res.json().then((data) => {
             
             // Send to values to the view model with data binding
-            let temperature = instance.string("Temperature");         
+            let temperature = instance.string("temperature");         
             temperature.value = Math.floor(data.main.temp) + "°C";
 
-            let humidity = instance.string("Humidity");         
+            let humidity = instance.string("humidity");         
             humidity.value = data.main.humidity + "%";
            
-            let pressure = instance.string("Pressure");         
+            let pressure = instance.string("pressure");         
             pressure.value = data.main.pressure + "";
 
-            let description = instance.string("Description");         
+            let description = instance.string("description");         
             description.value = data.weather[0].description;
 
-            let wind = instance.string("Wind");         
+            let wind = instance.string("wind");         
             wind.value = data.wind.speed + "";
 
-            let city = instance.string("City");         
+            let city = instance.string("city");         
             city.value = data.name;
 
-            let iconData = data.weather[0].icon;
-            iconData = iconData.substring(0, iconData.length - 1);
- 
-            let iconNumber = instance.number("IconNumber");
-            iconNumber.value = iconData;             
+             let icon = instance.string("icon");         
+            icon.value = data.weather[0].icon;
+         
 
           });
         }
